@@ -1,68 +1,72 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class JDBCUtils {
     private static Connection connection;
-    private static  Statement statement;
+    private static Statement statement;
 
-    public static Connection connectToDatabase(){
-        //1. Step:Registration to the Driver
+    //1. Step: Registration to the driver
+    //2. Step: Create connection with database
+    public static Connection connectToDatabase() {
 
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
-        //2. Step: Create connection with database
-
         try {
-            connection= DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "root");
+            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "root");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println("Connection is successful!");
+        System.out.println("connection is success");
         return connection;
-
     }
 
-    public static Statement createStatement(){
-
+    //3. Step: create statement
+    public static Statement createStatement() {
         try {
-            statement=connection.createStatement();
+            statement = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println("Statement created!");
-
+        System.out.println("statement created");
         return statement;
     }
 
-
-    public static void connectToDatabase(String localhost, String postgres, String postgres1, String root) {
-    }
-
-    public static void getColoumnList(String coloumnName, String tableName ) throws SQLException {
-        ResultSet resultset=null;
-        String query = "select" + coloumnName + "from" + tableName;
-
+    //4. execute query
+    public static boolean execute(String query) {
+        boolean isExecute;
         try {
-            resultset = statement.executeQuery(query);//wnat to print data, make it executeQuerry
+            isExecute = statement.execute(query);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        while(true){
-            if(!resultset.next())
-                break;
-        }
-        try{
-            resultset.getObject((1));
-        }catch (SQLException e){
-
-        }
-
-        return;
+        System.out.println("query executed");
+        return isExecute;
     }
 
+    //5. Step: Close the connection and statement
+    public static void closeConnectionAndStatement() {
+        try {
+            connection.close();
+            statement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            if (connection.isClosed() && statement.isClosed()) {
+                System.out.println("connection and statement closed");
+            }else
+                System.out.println("connection and statement not closed");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
